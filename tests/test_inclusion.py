@@ -69,6 +69,11 @@ class InclusionTests(unittest.TestCase):
         with patch("main.requests.get") as get, redirect_stdout(self.output):
             get.return_value.json.return_value = {"test-entry": self.entry}
             inclusion(0, self.artifact)
+        return get
+
+    def test_inclusion_fetches_entry_only_once(self):
+        get = self.run_inclusion()
+        get.assert_called_once()
 
     def test_valid_signature_and_proof_print_success(self):
         self.run_inclusion()
