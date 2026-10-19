@@ -51,8 +51,7 @@ def inclusion(log_index, artifact_filepath, debug=False):
         proof["rootHash"],
     )
 
-    # verify_inclusion is supposed to return a boolean to indicate failure/success, though it did not
-    # I'd avoid modifying assignment infrastructure but apparently below print will be executed unconditionally
+    # Both verification functions raise on failure; reaching here means both passed.
     print("Offline verification successful")
     
     return
