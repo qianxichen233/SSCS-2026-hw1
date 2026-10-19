@@ -17,12 +17,8 @@ def get_log_entry(log_index, debug=False):
     entry_id = list(data.keys())[0]
     return data[entry_id]
 
-def get_verification_proof(log_index, debug=False):
-    entry = get_log_entry(log_index, debug)
-
-    proof = entry["verification"]["inclusionProof"]
-
-    return proof
+def get_verification_proof(entry):
+    return entry["verification"]["inclusionProof"]
 
 def inclusion(log_index, artifact_filepath, debug=False):
     entry = get_log_entry(log_index, debug)
@@ -39,7 +35,7 @@ def inclusion(log_index, artifact_filepath, debug=False):
     pubkey = extract_public_key(certificate)
     verify_artifact_signature(signature, pubkey, artifact_filepath)
 
-    proof = get_verification_proof(log_index, debug)
+    proof = get_verification_proof(entry)
     leaf_hash = compute_leaf_hash(entry["body"])
 
     verify_inclusion(
