@@ -4,11 +4,14 @@ import base64, json
 from util import extract_public_key, verify_artifact_signature
 from merkle_proof import DefaultHasher, verify_consistency, verify_inclusion, compute_leaf_hash
 
+def get_maybe_raise(url, params=None):
+    response = requests.get(url, params=params, timeout=10)
+    response.raise_for_status()
+    return response
+
 def get_log_entry(log_index, debug=False):
     url = "https://rekor.sigstore.dev/api/v1/log/entries"
-    response = requests.get(url, params={"logIndex": log_index})
-    response.raise_for_status()
-
+    response = get_maybe_raise(url, params={"logIndex": log_index})
     data = response.json()
 
     if debug:
@@ -55,9 +58,7 @@ def inclusion(log_index, artifact_filepath, debug=False):
 def get_latest_checkpoint(debug=False):
     url = "https://rekor.sigstore.dev/api/v1/log"
 
-    response = requests.get(url)
-    response.raise_for_status()
-
+    response = get_maybe_raise(url)
     return response.json()
 
 def consistency(prev_checkpoint, debug=False):
@@ -79,9 +80,7 @@ def consistency(prev_checkpoint, debug=False):
         "treeID": prev_checkpoint["treeID"]
     }
 
-    response = requests.get(url, params=params)
-    response.raise_for_status()
-
+    response = get_maybe_raise(url, params=params)
     proof = response.json()
 
     verify_consistency(
