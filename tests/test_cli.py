@@ -18,7 +18,11 @@ class CliTests(unittest.TestCase):
     def run_cli(self, args):
         output = io.StringIO()
         errors = io.StringIO()
-        with patch("sys.argv", ["main.py"] + args), redirect_stdout(output), redirect_stderr(errors):
+        with (
+            patch("sys.argv", ["main.py"] + args),
+            redirect_stdout(output),
+            redirect_stderr(errors),
+        ):
             try:
                 main()
             except SystemExit as exc:
@@ -63,10 +67,17 @@ class CliTests(unittest.TestCase):
 
     def test_consistency_command_still_runs(self):
         root = "00" * 32
-        code, _ = self.run_cli([
-            "--consistency", "--tree-id", "test-tree", "--tree-size", "1",
-            "--root-hash", root,
-        ])
+        code, _ = self.run_cli(
+            [
+                "--consistency",
+                "--tree-id",
+                "test-tree",
+                "--tree-size",
+                "1",
+                "--root-hash",
+                root,
+            ]
+        )
         self.assertEqual(code, 0)
         self.commands["consistency"].assert_called_once_with(
             {"treeID": "test-tree", "treeSize": 1, "rootHash": root}, False

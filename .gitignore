@@ -1,1 +1,26 @@
+.venv/
 __pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local secrets and private keys
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Coverage, reports, logs, and build output
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+reports/
+*.log
+*.zip
+checkpoint.json
+build/
+dist/
+*.egg-info/

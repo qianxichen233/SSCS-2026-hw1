@@ -25,9 +25,12 @@ class ConsistencyTests(unittest.TestCase):
         proof_response = Mock()
         proof_response.json.return_value = self.proof
         # Mock only HTTP responses; run the real consistency verifier.
-        with patch(
-            "main.requests.get", side_effect=[checkpoint_response, proof_response]
-        ), redirect_stdout(self.output):
+        with (
+            patch(
+                "main.requests.get", side_effect=[checkpoint_response, proof_response]
+            ),
+            redirect_stdout(self.output),
+        ):
             consistency(self.previous)
 
     def test_valid_proof_prints_success(self):

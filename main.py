@@ -1,13 +1,23 @@
 import argparse
+import base64
+import json
+
 import requests
-import base64, json
+
+from merkle_proof import (
+    DefaultHasher,
+    compute_leaf_hash,
+    verify_consistency,
+    verify_inclusion,
+)
 from util import extract_public_key, verify_artifact_signature
-from merkle_proof import DefaultHasher, verify_consistency, verify_inclusion, compute_leaf_hash
+
 
 def get_maybe_raise(url, params=None):
     response = requests.get(url, params=params, timeout=10)
     response.raise_for_status()
     return response
+
 
 def get_log_entry(log_index, debug=False):
     url = "https://rekor.sigstore.dev/api/v1/log/entries"
@@ -17,23 +27,21 @@ def get_log_entry(log_index, debug=False):
     if debug:
         print(data)
 
-    entry_id = list(data.keys())[0]
+    entry_id = next(iter(data.keys()))
     return data[entry_id]
+
 
 def get_verification_proof(entry):
     return entry["verification"]["inclusionProof"]
+
 
 def inclusion(log_index, artifact_filepath, debug=False):
     entry = get_log_entry(log_index, debug)
 
     body = json.loads(base64.b64decode(entry["body"]))
 
-    signature = base64.b64decode(
-        body["spec"]["signature"]['content']
-    )
-    certificate = base64.b64decode(
-        body["spec"]["signature"]['publicKey']["content"]
-    )
+    signature = base64.b64decode(body["spec"]["signature"]["content"])
+    certificate = base64.b64decode(body["spec"]["signature"]["publicKey"]["content"])
 
     pubkey = extract_public_key(certificate)
     verify_artifact_signature(signature, pubkey, artifact_filepath)
@@ -52,14 +60,14 @@ def inclusion(log_index, artifact_filepath, debug=False):
 
     # Both verification functions raise on failure; reaching here means both passed.
     print("Offline verification successful")
-    
-    return
+
 
 def get_latest_checkpoint(debug=False):
     url = "https://rekor.sigstore.dev/api/v1/log"
 
     response = get_maybe_raise(url)
     return response.json()
+
 
 def consistency(prev_checkpoint, debug=False):
     if not prev_checkpoint:
@@ -71,13 +79,13 @@ def consistency(prev_checkpoint, debug=False):
         raise ValueError("Checkpoints belong to different trees")
     if prev_checkpoint["treeSize"] >= latest_checkpoint["treeSize"]:
         raise ValueError("Previous checkpoint must be older than latest checkpoint")
-        
+
     url = "https://rekor.sigstore.dev/api/v1/log/proof"
 
     params = {
         "firstSize": prev_checkpoint["treeSize"],
         "lastSize": latest_checkpoint["treeSize"],
-        "treeID": prev_checkpoint["treeID"]
+        "treeID": prev_checkpoint["treeID"],
     }
 
     response = get_maybe_raise(url, params=params)
@@ -89,39 +97,57 @@ def consistency(prev_checkpoint, debug=False):
         latest_checkpoint["treeSize"],
         proof["hashes"],
         prev_checkpoint["rootHash"],
-        latest_checkpoint["rootHash"]
+        latest_checkpoint["rootHash"],
     )
-    
+
     print("Consistency verification successful")
-    
-    return
+
 
 def main():
     debug = False
     parser = argparse.ArgumentParser(description="Rekor Verifier")
-    parser.add_argument('-d', '--debug', help='Debug mode',
-                        required=False, action='store_true') # Default false
+    parser.add_argument(
+        "-d", "--debug", help="Debug mode", required=False, action="store_true"
+    )  # Default false
     commands = parser.add_mutually_exclusive_group()
-    commands.add_argument('-c', '--checkpoint', help='Obtain latest checkpoint\
-                        from Rekor Server public instance',
-                        required=False, action='store_true')
-    commands.add_argument('--inclusion', help='Verify inclusion of an\
+    commands.add_argument(
+        "-c",
+        "--checkpoint",
+        help="Obtain latest checkpoint\
+                        from Rekor Server public instance",
+        required=False,
+        action="store_true",
+    )
+    commands.add_argument(
+        "--inclusion",
+        help="Verify inclusion of an\
                         entry in the Rekor Transparency Log using log index\
                         and artifact filename.\
-                        Usage: --inclusion 126574567',
-                        required=False, type=int)
-    parser.add_argument('--artifact', help='Artifact filepath for verifying\
-                        signature',
-                        required=False)
-    commands.add_argument('--consistency', help='Verify consistency of a given\
-                        checkpoint with the latest checkpoint.',
-                        action='store_true')
-    parser.add_argument('--tree-id', help='Tree ID for consistency proof',
-                        required=False)
-    parser.add_argument('--tree-size', help='Tree size for consistency proof',
-                        required=False, type=int)
-    parser.add_argument('--root-hash', help='Root hash for consistency proof',
-                        required=False)
+                        Usage: --inclusion 126574567",
+        required=False,
+        type=int,
+    )
+    parser.add_argument(
+        "--artifact",
+        help="Artifact filepath for verifying\
+                        signature",
+        required=False,
+    )
+    commands.add_argument(
+        "--consistency",
+        help="Verify consistency of a given\
+                        checkpoint with the latest checkpoint.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--tree-id", help="Tree ID for consistency proof", required=False
+    )
+    parser.add_argument(
+        "--tree-size", help="Tree size for consistency proof", required=False, type=int
+    )
+    parser.add_argument(
+        "--root-hash", help="Root hash for consistency proof", required=False
+    )
     args = parser.parse_args()
     if args.inclusion is not None and not args.artifact:
         parser.error("--inclusion requires an artifact file path using --artifact")
@@ -152,6 +178,7 @@ def main():
         prev_checkpoint["rootHash"] = args.root_hash
 
         consistency(prev_checkpoint, debug)
+
 
 if __name__ == "__main__":
     main()
