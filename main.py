@@ -62,7 +62,6 @@ def inclusion(log_index, artifact_filepath, debug=False):
     print("Offline verification successful")
 
 
-
 def get_latest_checkpoint(debug=False):
     url = "https://rekor.sigstore.dev/api/v1/log"
 
@@ -102,7 +101,6 @@ def consistency(prev_checkpoint, debug=False):
     )
 
     print("Consistency verification successful")
-
 
 
 def main():
