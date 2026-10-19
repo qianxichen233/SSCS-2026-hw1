@@ -15,6 +15,11 @@ dependencies = [
 [tool.poetry]
 package-mode = false
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--cov=main --cov=merkle_proof --cov=util --cov=scripts --cov-report=term-missing --cov-fail-under=75"
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
@@ -24,5 +29,7 @@ dev = [
     "ruff (>=0.17.1,<0.18.0)",
     "mypy (>=2.4.0,<3.0.0)",
     "bandit (>=1.9.4,<2.0.0)",
-    "types-requests (>=2.33.0.20261006,<3.0.0.0)"
+    "types-requests (>=2.33.0.20261006,<3.0.0.0)",
+    "pytest (>=9.1.1,<10.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)"
 ]
