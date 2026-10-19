@@ -23,7 +23,7 @@ poetry install
 poetry run ruff format .
 poetry run ruff check .
 poetry run mypy main.py merkle_proof.py util.py
-poetry run bandit -r . --exclude ./.venv
+poetry run bandit -c pyproject.toml -r .
 poetry run pytest
 ```
 
