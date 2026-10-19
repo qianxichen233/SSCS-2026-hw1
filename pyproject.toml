@@ -1,0 +1,28 @@
+[project]
+name = "rekor-monitor"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Qianxi Chen",email = "qc815@nyu.edu"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "requests (>=2.34.2,<3.0.0)",
+    "cryptography (>=50.0.2,<51.0.0)"
+]
+
+[tool.poetry]
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "ruff (>=0.17.1,<0.18.0)",
+    "mypy (>=2.4.0,<3.0.0)",
+    "bandit (>=1.9.4,<2.0.0)",
+    "types-requests (>=2.33.0.20261006,<3.0.0.0)"
+]
