@@ -15,6 +15,23 @@ dependencies = [
 [tool.poetry]
 package-mode = false
 
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.10"
+check_untyped_defs = true
+
+[tool.bandit]
+exclude_dirs = [".venv"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
@@ -28,7 +45,7 @@ build-backend = "poetry.core.masonry.api"
 dev = [
     "ruff (>=0.17.1,<0.18.0)",
     "mypy (>=2.4.0,<3.0.0)",
-    "bandit (>=1.9.4,<2.0.0)",
+    "bandit[toml] (>=1.9.4,<2.0.0)",
     "types-requests (>=2.33.0.20261006,<3.0.0.0)",
     "pytest (>=9.1.1,<10.0.0)",
     "pytest-cov (>=7.1.0,<8.0.0)",

@@ -130,7 +130,7 @@ class RootMismatchError(Exception):
         self.calculated_root = binascii.hexlify(bytearray(calculated_root))
 
     def __str__(self):
-        return f"calculated root:\n{self.calculated_root}\n does not match expected root:\n{self.expected_root}"
+        return f"calculated root:\n{self.calculated_root!r}\n does not match expected root:\n{self.expected_root!r}"
 
 
 def root_from_inclusion_proof(hasher, index, size, leaf_hash, proof):
