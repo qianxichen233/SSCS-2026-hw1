@@ -101,10 +101,11 @@ def main():
     parser = argparse.ArgumentParser(description="Rekor Verifier")
     parser.add_argument('-d', '--debug', help='Debug mode',
                         required=False, action='store_true') # Default false
-    parser.add_argument('-c', '--checkpoint', help='Obtain latest checkpoint\
+    commands = parser.add_mutually_exclusive_group()
+    commands.add_argument('-c', '--checkpoint', help='Obtain latest checkpoint\
                         from Rekor Server public instance',
                         required=False, action='store_true')
-    parser.add_argument('--inclusion', help='Verify inclusion of an\
+    commands.add_argument('--inclusion', help='Verify inclusion of an\
                         entry in the Rekor Transparency Log using log index\
                         and artifact filename.\
                         Usage: --inclusion 126574567',
@@ -112,7 +113,7 @@ def main():
     parser.add_argument('--artifact', help='Artifact filepath for verifying\
                         signature',
                         required=False)
-    parser.add_argument('--consistency', help='Verify consistency of a given\
+    commands.add_argument('--consistency', help='Verify consistency of a given\
                         checkpoint with the latest checkpoint.',
                         action='store_true')
     parser.add_argument('--tree-id', help='Tree ID for consistency proof',
@@ -122,6 +123,8 @@ def main():
     parser.add_argument('--root-hash', help='Root hash for consistency proof',
                         required=False)
     args = parser.parse_args()
+    if args.inclusion is not None and not args.artifact:
+        parser.error("--inclusion requires an artifact file path using --artifact")
     if args.debug:
         debug = True
         print("enabled debug mode")
@@ -130,7 +133,7 @@ def main():
         # if debug is enabled, store it in a file checkpoint.json
         checkpoint = get_latest_checkpoint(debug)
         print(json.dumps(checkpoint, indent=4))
-    if args.inclusion:
+    if args.inclusion is not None:
         inclusion(args.inclusion, args.artifact, debug)
     if args.consistency:
         if not args.tree_id:
